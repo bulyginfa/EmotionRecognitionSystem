@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo">Emotion AI</div>
+        <nav>
+            <ul>
+                <li><a href="#live-video">Live Video</a></li>
+                <li><a href="#upload-photo">Photo Analysis</a></li>
+                <li><a href="#screen-sharing">Screen Sharing</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="live-video" class="card">
+            <h2>Live Emotion Detection</h2>
+            <video id="video" autoplay muted></video>
+            <img id="processedVideo" alt="Processed Video"/>
+        </section>
+
+        <section id="upload-photo" class="card">
+            <h2>Photo Emotion Analysis</h2>
+            <form id="uploadForm">
+                <input type="file" id="fileInput" name="file" accept="image/*"/>
+                <button type="submit">Analyze</button>
+            </form>
+            <img id="analyzedImage" alt="Analyzed Image"/>
+        </section>
+
+        <section id="screen-sharing" class="card">
+            <h2>Screen Sharing</h2>
+            <button id="startCapture">Start Screen Capture</button>
+            <video id="screenVideo" autoplay playsinline></video>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Emotion AI</p>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
