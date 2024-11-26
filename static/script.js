@@ -59,16 +59,27 @@ uploadForm.addEventListener('submit', async (e) => {
     const formData = new FormData();
     formData.append('file', fileInput);
 
-    const response = await fetch('/analyze-photo/', {
-        method: 'POST',
-        body: formData,
-    });
+    try {
+        const response = await fetch('/analyze-photo/', {
+            method: 'POST',
+            body: formData,
+        });
 
-    if (response.ok) {
-        const blob = await response.blob();
-        analyzedImage.src = URL.createObjectURL(blob);
-    } else {
-        alert("Failed to analyze the photo.");
+        if (response.ok) {
+            const result = await response.json();
+
+            // Отобразить преобразованное изображение
+            const imageBase64 = result.image;
+            analyzedImage.src = `data:image/jpeg;base64,${imageBase64}`;
+
+            // Вероятности эмоций остаются в консоли (не отображаются)
+            console.log("Probabilities:", result.probabilities);
+        } else {
+            alert("Failed to analyze the photo.");
+        }
+    } catch (err) {
+        console.error("Error analyzing photo:", err);
+        alert("An error occurred while processing the image.");
     }
 });
 

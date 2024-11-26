@@ -9,9 +9,10 @@ from PIL import Image
 import io
 from io import BytesIO
 import base64
+from base64 import b64encode
 
 from fastapi import FastAPI, File, UploadFile, WebSocket
-from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import mediapipe as mp
 import cv2
@@ -134,10 +135,14 @@ async def analyze_photo(file: UploadFile = File(...)):
 
     # Конвертация результата в изображение
     _, encoded_image = cv2.imencode(".jpg", processed_frame)
-    return StreamingResponse(
-        BytesIO(encoded_image.tobytes()), 
-        media_type="image/jpeg"
-    )
+    image_base64 = b64encode(encoded_image).decode('utf-8')
+
+    # Формирование ответа
+    response_data = {
+        "image": image_base64,  # Кодированное изображение в формате base64
+        "probabilities": probabilities,  # Вероятности эмоций
+    }
+    return JSONResponse(content=response_data)
 
 
 @app.websocket("/ws")
