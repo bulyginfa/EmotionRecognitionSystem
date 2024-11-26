@@ -59,7 +59,9 @@ def process_frame(frame, faceDetection, net, data_transform, emotion_dict, devic
     Обработка кадра: детекция лиц, анализ эмоций и отрисовка результатов.
     """
     face_tensors = []
+    probabilities = []
     bboxes = []
+    
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = faceDetection.process(frame_rgb)
 
@@ -92,6 +94,8 @@ def process_frame(frame, faceDetection, net, data_transform, emotion_dict, devic
                 face_text = f"{face_emotion}: {top_prob * 100:.2f}%"
                 y_text = y_min - 10 if y_min - 10 > 10 else y_min + 10
 
+                probabilities.append({emotion: float(p) for emotion, p in zip(emotion_dict.values(), prob)})
+                
                 # Отрисовка прямоугольника и текста
                 cv2.rectangle(frame, (x_min, y_min), (x_min + width, y_min + height), (80, 160, 30), 3)
                 cv2.putText(frame, face_text, (x_min, y_text), cv2.FONT_HERSHEY_TRIPLEX, 0.8, (80, 160, 30), 1, cv2.LINE_AA)
@@ -103,7 +107,7 @@ def process_frame(frame, faceDetection, net, data_transform, emotion_dict, devic
                     cv2.rectangle(frame, (x_min + width, y_min + j * 10), (x_min + width + bar_width, y_min + j * 10 - 7), (0, 0, 165), -1)
                     cv2.putText(frame, prob_text, (x_min + width, y_min + j * 10), cv2.FONT_HERSHEY_TRIPLEX, 0.35, (255, 255, 255), 1, cv2.LINE_AA)
 
-    return frame
+    return frame, probabilities
 
 
 
@@ -126,7 +130,7 @@ async def analyze_photo(file: UploadFile = File(...)):
     mpFaceDetection = mp.solutions.face_detection
     faceDetection = mpFaceDetection.FaceDetection(0.7)
 
-    processed_frame = process_frame(frame, faceDetection, net, data_transform, emotion_dict, device)
+    processed_frame, probabilities = process_frame(frame, faceDetection, net, data_transform, emotion_dict, device)
 
     # Конвертация результата в изображение
     _, encoded_image = cv2.imencode(".jpg", processed_frame)
@@ -153,7 +157,7 @@ async def websocket_endpoint(websocket: WebSocket):
             frame = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
             frame = cv2.flip(frame, 1)
 
-            processed_frame = process_frame(frame, faceDetection, net, data_transform, emotion_dict, device)
+            processed_frame, probabilities = process_frame(frame, faceDetection, net, data_transform, emotion_dict, device)
 
             # Отправка результата клиенту
             _, encoded_image = cv2.imencode(".jpg", processed_frame)

@@ -1,4 +1,7 @@
 /.DS_Store
-/checkpoints
 /uploads
 /web_env
+/models/__pycache__
+/utils/__pycache__
+/checkpoints
+/__pycache__
