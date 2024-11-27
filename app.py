@@ -56,7 +56,6 @@ def process_frame(frame, faceDetection, net, data_transform, emotion_dict, devic
     Обработка кадра: детекция лиц, анализ эмоций и отрисовка результатов.
     """
     face_tensors = []
-    probabilities = []
     bboxes = []
     
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -91,7 +90,7 @@ def process_frame(frame, faceDetection, net, data_transform, emotion_dict, devic
                 face_text = f"{face_emotion}: {top_prob * 100:.2f}%"
                 y_text = y_min - 10 if y_min - 10 > 10 else y_min + 10
 
-                probabilities.append({emotion: float(p) for emotion, p in zip(emotion_dict.values(), prob)})
+                probabilities = {emotion: float(p) for emotion, p in zip(emotion_dict.values(), prob)}
                 
                 # Отрисовка прямоугольника и текста
                 cv2.rectangle(frame, (x_min, y_min), (x_min + width, y_min + height), (80, 160, 30), 3)
