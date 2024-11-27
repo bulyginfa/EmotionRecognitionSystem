@@ -64,10 +64,23 @@ main {
 }
 
 #live-video video, #live-video img {
-    width: 48%;
+    width: 100%;
     height: auto;
     max-height: 1500px;
     border-radius: 10px;
+}
+
+
+#screenVideo {
+    width: 100%;        /* Видео будет растягиваться на всю ширину родительского элемента */
+    height: auto;       /* Высота будет подстраиваться пропорционально */
+    object-fit: contain; /* Сохраняет пропорции и не деформирует изображение */
+}
+
+#processedScreenVideo {
+    width: 100%;        /* Изображение будет растягиваться на всю ширину */
+    height: auto;       /* Высота будет пропорциональной */
+    object-fit: contain;
 }
 
 .card h2 {
@@ -88,12 +101,7 @@ main {
     border-radius: 8px;
 }
 
-#live-video video, #live-video img {
-    width: 100%;
-    height: auto;
-    max-height: 600px;
-    object-fit: cover;
-}
+
 
 #live-video h2 {
     text-align: center;

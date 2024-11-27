@@ -156,21 +156,26 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            img_bytes = data.split(",")[1]
+            message = json.loads(data)
+    
+            print(message)
+            img_bytes = data.split(",")[2]
             img_array = np.frombuffer(base64.b64decode(img_bytes), dtype=np.uint8)
             frame = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
             frame = cv2.flip(frame, 1)
 
             processed_frame, probabilities = process_frame(frame, faceDetection, net, data_transform, emotion_dict, device)
 
-            # Отправка результата клиенту
             _, encoded_image = cv2.imencode(".jpg", processed_frame)
             jpg_as_text = base64.b64encode(encoded_image).decode("utf-8")
             img_data_url = f"data:image/jpeg;base64,{jpg_as_text}"
+
             response = {
                     "image": img_data_url,
-                    "probabilities": probabilities
+                    "probabilities": probabilities,
+                    "type": message['type']
                 }
+            
             await websocket.send_text(json.dumps(response))
 
     except Exception as e:

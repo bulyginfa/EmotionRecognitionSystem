@@ -1,52 +1,77 @@
-const video = document.getElementById('video');
-const processedVideo = document.getElementById('processedVideo');
+const WebCamVideo = document.getElementById('WebcamVideo');
+const processedWebCamVideo = document.getElementById('processedWebCamVideo');
+
 const screenVideo = document.getElementById('screenVideo');
+const processedScreenVideo = document.getElementById('processedScreenVideo');
+
+const startWebcamButton = document.getElementById('startWebcam');
 const startCaptureButton = document.getElementById('startCapture');
 const uploadForm = document.getElementById('uploadForm');
 const analyzedImage = document.getElementById('analyzedImage');
-// Получаем доступ к видео элементу
 
-// Настроим получение видео с веб-камеры
-navigator.mediaDevices.getUserMedia({ video: true })
-    .then(function(stream) {
-        video.srcObject = stream;
-    })
-    .catch(function(error) {
-        console.log("Error accessing webcam: ", error);
-    });
+const ws = new WebSocket("ws://localhost:8000/ws");
 
 // Функция для зеркального отображения видео
 function mirrorVideo() {
-    video.style.transform = 'scaleX(-1)';
+    WebCamVideo.style.transform = 'scaleX(-1)';
+    screenVideo.style.transform = 'scaleX(-1)';
 }
 
-// Включаем зеркальное отображение при загрузке страницы
-mirrorVideo();
+mirrorVideo()
 
-// Initialize WebSocket for live video processing
-const ws = new WebSocket("ws://localhost:8000/ws");
+// Настройка кнопки для начала видеостриминга с веб-камеры
+startWebcamButton.addEventListener('click', async () => {
+    try {
+        const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        WebCamVideo.srcObject = videoStream;
 
-// Live video stream
-navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-    video.srcObject = stream;
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 960;
+        canvas.height = 720;
 
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    canvas.width = 960;
-    canvas.height = 720;
+        // Отправка кадров с веб-камеры через WebSocket
+        setInterval(() => {
+            context.drawImage(WebCamVideo, 0, 0, canvas.width, canvas.height);
+            const imgData = canvas.toDataURL('image/jpeg');
+            ws.send(JSON.stringify({ type: 'webcam', img: imgData }));
+        }, 90);
+    } catch (error) {
+        console.error("Error accessing webcam:", error);
+        alert("Error accessing webcam.");
+    }
+});
 
-    setInterval(() => {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imgData = canvas.toDataURL('image/jpeg');
-        ws.send(imgData);
-    }, 90);
+// Настройка кнопки для начала видеостриминга с захвата экрана
+startCaptureButton.addEventListener('click', async () => {
+    try {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        screenVideo.srcObject = screenStream;
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 960;
+        canvas.height = 720;
+
+        // Отправка кадров с экрана через WebSocket
+        setInterval(() => {
+            context.drawImage(screenVideo, 0, 0, canvas.width, canvas.height);
+            const imgData = canvas.toDataURL('image/jpeg');
+            ws.send(JSON.stringify({ type: 'screen', img: imgData }));
+        }, 90);
+    } catch (err) {
+        console.error("Error: Unable to capture screen.", err);
+    }
 });
 
 ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    const img = new Image();
-    img.src = data.image;
-    processedVideo.src = img.src
+
+    if (data.type === 'webcam') {
+        processedWebCamVideo.src = data.image;
+    } else if (data.type === 'screen') {
+        processedScreenVideo.src = data.image;
+    }
 
     console.log("Probabilities:", data.probabilities);
 };
@@ -88,20 +113,3 @@ uploadForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Screen sharing
-startCaptureButton.addEventListener('click', async () => {
-    try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({
-            video: true,
-            audio: false
-        });
-
-        screenVideo.srcObject = screenStream;
-
-        screenStream.getVideoTracks()[0].addEventListener('ended', () => {
-            alert('Screen sharing stopped.');
-        });
-    } catch (err) {
-        console.error("Error: Unable to capture screen.", err);
-    }
-});
