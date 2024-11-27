@@ -2,16 +2,13 @@
 python -m uvicorn app:app --reload
 """
 
-import os
 from pathlib import Path
 from PIL import Image
-import io
-from io import BytesIO
 import base64
 from base64 import b64encode
 import json
 from fastapi import FastAPI, File, UploadFile, WebSocket
-from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import mediapipe as mp
 import cv2
@@ -127,8 +124,7 @@ async def analyze_photo(file: UploadFile = File(...)):
     frame = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
 
     # Обработка изображения
-    mpFaceDetection = mp.solutions.face_detection
-    faceDetection = mpFaceDetection.FaceDetection(0.7)
+    faceDetection = mp.solutions.face_detection.FaceDetection(0.7)
 
     processed_frame, probabilities = process_frame(frame, faceDetection, net, data_transform, emotion_dict, device)
 
@@ -150,15 +146,13 @@ async def websocket_endpoint(websocket: WebSocket):
     Обработка видео с камеры через WebSocket.
     """
     await websocket.accept()
-    mpFaceDetection = mp.solutions.face_detection
-    faceDetection = mpFaceDetection.FaceDetection(0.7)
+    faceDetection = mp.solutions.face_detection.FaceDetection(0.7)
 
     try:
         while True:
             data = await websocket.receive_text()
             message = json.loads(data)
     
-            print(message)
             img_bytes = data.split(",")[2]
             img_array = np.frombuffer(base64.b64decode(img_bytes), dtype=np.uint8)
             frame = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
