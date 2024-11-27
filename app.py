@@ -2,7 +2,6 @@
 python -m uvicorn app:app --reload
 """
 
-
 import os
 from pathlib import Path
 from PIL import Image
@@ -10,7 +9,7 @@ import io
 from io import BytesIO
 import base64
 from base64 import b64encode
-
+import json
 from fastapi import FastAPI, File, UploadFile, WebSocket
 from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -168,6 +167,12 @@ async def websocket_endpoint(websocket: WebSocket):
             _, encoded_image = cv2.imencode(".jpg", processed_frame)
             jpg_as_text = base64.b64encode(encoded_image).decode("utf-8")
             img_data_url = f"data:image/jpeg;base64,{jpg_as_text}"
-            await websocket.send_text(img_data_url)
+            response = {
+                    "image": img_data_url,
+                    "probabilities": probabilities
+                }
+            await websocket.send_text(json.dumps(response))
+
     except Exception as e:
+        print(f"Exception occurred: {e}")
         await websocket.close()

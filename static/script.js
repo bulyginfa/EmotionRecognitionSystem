@@ -39,11 +39,16 @@ navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const imgData = canvas.toDataURL('image/jpeg');
         ws.send(imgData);
-    }, 100);
+    }, 90);
 });
 
 ws.onmessage = (event) => {
-    processedVideo.src = event.data;
+    const data = JSON.parse(event.data);
+    const img = new Image();
+    img.src = data.image;
+    processedVideo.src = img.src
+
+    console.log("Probabilities:", data.probabilities);
 };
 
 // Upload photo for analysis
