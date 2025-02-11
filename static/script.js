@@ -11,14 +11,6 @@ const analyzedImage = document.getElementById('analyzedImage');
 
 const ws = new WebSocket("ws://localhost:8000/ws");
 
-// Функция для зеркального отображения видео
-function mirrorVideo() {
-    WebCamVideo.style.transform = 'scaleX(-1)';
-    screenVideo.style.transform = 'scaleX(-1)';
-}
-
-mirrorVideo()
-
 // Настройка кнопки для начала видеостриминга с веб-камеры
 startWebcamButton.addEventListener('click', async () => {
     try {

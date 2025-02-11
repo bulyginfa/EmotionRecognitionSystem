@@ -57,6 +57,7 @@ def process_frame(frame, faceDetection, net, data_transform, emotion_dict, devic
     """
     face_tensors = []
     bboxes = []
+    probabilities = {}
     
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = faceDetection.process(frame_rgb)
@@ -94,7 +95,7 @@ def process_frame(frame, faceDetection, net, data_transform, emotion_dict, devic
                 
                 # Отрисовка прямоугольника и текста
                 cv2.rectangle(frame, (x_min, y_min), (x_min + width, y_min + height), (80, 160, 30), 3)
-                cv2.putText(frame, face_text, (x_min, y_text), cv2.FONT_HERSHEY_TRIPLEX, 0.8, (80, 160, 30), 1, cv2.LINE_AA)
+                cv2.putText(frame, face_text, (x_min, y_text), cv2.FONT_HERSHEY_TRIPLEX, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
 
                 # Отображение вероятностей для каждой эмоции
                 for j, (emotion, p) in enumerate(zip(emotion_dict.values(), prob)):
@@ -155,7 +156,7 @@ async def websocket_endpoint(websocket: WebSocket):
             img_bytes = data.split(",")[2]
             img_array = np.frombuffer(base64.b64decode(img_bytes), dtype=np.uint8)
             frame = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-            frame = cv2.flip(frame, 1)
+            #frame = cv2.flip(frame, 1)
 
             processed_frame, probabilities = process_frame(frame, faceDetection, net, data_transform, emotion_dict, device)
 
