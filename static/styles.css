@@ -43,7 +43,7 @@ header nav ul li a:hover {
 
 main {
     padding: 2rem;
-    max-width: 1200px;
+    max-width: 10200px;
     width: 100%;
     display: flex;
     flex-wrap: wrap;
@@ -78,9 +78,9 @@ main {
 }
 
 #processedScreenVideo {
-    width: 100%;        /* Изображение будет растягиваться на всю ширину */
-    height: auto;       /* Высота будет пропорциональной */
-    object-fit: contain;
+    width: 100%;        /* Видео будет растягиваться на всю ширину родительского элемента */
+    height: auto;       /* Высота будет подстраиваться пропорционально */
+    object-fit: contain; /* Сохраняет пропорции и не деформирует изображение */
 }
 
 .card h2 {
